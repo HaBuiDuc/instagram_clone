@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:instagram_clone/src/core/errors/failure.dart';
-import 'package:instagram_clone/src/core/use_case/use_case.dart';
-import 'package:instagram_clone/src/features/newfeeds/domain/entities/user_entity.dart';
+import 'package:instagram_clone/src/core/common/use_case/use_case.dart';
+import 'package:instagram_clone/src/core/common/entities/user_entity.dart';
 import 'package:instagram_clone/src/features/newfeeds/domain/repositories/user_repository.dart';
 
 class GetUser implements UseCase<UserEntity, String> {

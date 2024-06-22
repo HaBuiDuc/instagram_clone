@@ -34,6 +34,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'fullName': fullName,
           'userName': username,
           'email': email,
+          'followers': 0,
+          'following': 0,
+          'posts': 0,
         };
         db.collection('users').add(userData).catchError((error) {
           throw ServerException(message: 'Can\'t add user data');

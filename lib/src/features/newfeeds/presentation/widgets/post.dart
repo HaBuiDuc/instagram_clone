@@ -1,77 +1,93 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_indicator/carousel_indicator.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instagram_clone/src/core/common/entities/user_entity.dart';
 import 'package:instagram_clone/src/core/common/widgets/loading_page.dart';
-import 'package:instagram_clone/src/features/newfeeds/domain/entities/post_entity.dart';
+import 'package:instagram_clone/src/core/common/entities/post_entity.dart';
 import 'package:instagram_clone/src/features/newfeeds/presentation/blocs/user_bloc/user_bloc.dart';
+import 'package:instagram_clone/src/injection.dart';
 
 class Post extends StatefulWidget {
   final PostEntity postEntity;
-  const Post({super.key, required this.postEntity});
+  final void Function(UserEntity) onUserProfileNavigate;
+  const Post({super.key, required this.postEntity, required this.onUserProfileNavigate});
 
   @override
   State<Post> createState() => _PostState();
 }
 
 class _PostState extends State<Post> {
+  late final UserBloc _userBloc;
   int _currentIndex = 0;
   @override
   void initState() {
-    _loadUserInfo();
     super.initState();
+    _userBloc = UserBloc(serviceLocator());
+    if (!_userBloc.isClosed) {
+      _loadUserInfo();
+    }
   }
 
   void _loadUserInfo() {
-    context
-        .read<UserBloc>()
-        .add(LoadingUserEvent(userId: widget.postEntity.authorId));
+    _userBloc.add(LoadingUserEvent(userId: widget.postEntity.authorId));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     const double iconSize = 24;
     return BlocBuilder<UserBloc, UserState>(
+      bloc: _userBloc,
       builder: (context, state) {
         if (state is UserLoaded) {
           var user = state.userEntity;
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: ClipOval(
-                          child: user.avatarUrl != null
-                              ? Image.network(user.avatarUrl!)
-                              : Image.asset('assets/images/default_avatar.png'),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 12,
-                      ),
-                      Expanded(
-                        child: Text(
-                          user.userName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+              GestureDetector(
+                onTap: () => widget.onUserProfileNavigate(user),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: ClipOval(
+                            child: user.avatarUrl != null
+                                // ? Image.network(user.avatarUrl!)
+                                ? CachedNetworkImage(imageUrl: user.avatarUrl!)
+                                : Image.asset('assets/images/default_avatar.png'),
                           ),
                         ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.more_horiz),
+                        const SizedBox(
+                          width: 12,
                         ),
-                      )
-                    ],
+                        Expanded(
+                          child: Text(
+                            user.userName,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.more_horiz),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -81,8 +97,8 @@ class _PostState extends State<Post> {
                     builder: (BuildContext context) {
                       return SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        child: Image.network(
-                          img,
+                        child: CachedNetworkImage(
+                          imageUrl: img,
                           fit: BoxFit.cover,
                         ),
                       );
@@ -99,39 +115,52 @@ class _PostState extends State<Post> {
                     },
                     enableInfiniteScroll: false),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Stack(
+                alignment: Alignment.center,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Image.asset(
-                          'assets/icons/like_icon.png',
-                          width: iconSize,
-                          height: iconSize,
-                        ),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {},
+                            icon: Image.asset(
+                              'assets/icons/like_icon.png',
+                              width: iconSize,
+                              height: iconSize,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: Image.asset(
+                              'assets/icons/comment_icon.png',
+                              width: iconSize,
+                              height: iconSize,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: Image.asset(
+                              'assets/icons/message_icon.png',
+                              width: iconSize,
+                              height: iconSize,
+                            ),
+                          ),
+                        ],
                       ),
                       IconButton(
                         onPressed: () {},
                         icon: Image.asset(
-                          'assets/icons/comment_icon.png',
-                          width: iconSize,
-                          height: iconSize,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Image.asset(
-                          'assets/icons/message_icon.png',
+                          'assets/icons/save_icon.png',
                           width: iconSize,
                           height: iconSize,
                         ),
                       ),
                     ],
                   ),
-                  Expanded(
-                    child: Center(
+                  if (widget.postEntity.content.length > 1)
+                    Center(
                       child: CarouselIndicator(
                         count: widget.postEntity.content.length,
                         index: _currentIndex,
@@ -141,10 +170,8 @@ class _PostState extends State<Post> {
                         height: 6,
                       ),
                     ),
-                  ),
-                  const Icon(Icons.abc)
                 ],
-              ),
+              )
             ],
           );
         }

@@ -97,7 +97,13 @@ class _LoginPageState extends State<LoginPage> {
                   height: 10,
                 ),
                 AuthButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.read<AuthBloc>().add(
+                          AuthLoginEvent(
+                              email: emailController.text,
+                              password: passwordController.text),
+                        );
+                  },
                   buttonText: 'Login',
                 ),
                 Padding(

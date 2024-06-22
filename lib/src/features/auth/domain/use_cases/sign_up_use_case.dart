@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:instagram_clone/src/core/errors/failure.dart';
-import 'package:instagram_clone/src/core/use_case/use_case.dart';
+import 'package:instagram_clone/src/core/common/use_case/use_case.dart';
 import 'package:instagram_clone/src/features/auth/domain/repositories/auth_repository.dart';
 
 class SignUpUseCase implements UseCase<UserCredential, SignUpParams> {

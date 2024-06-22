@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:instagram_clone/src/core/errors/failure.dart';
 import 'package:instagram_clone/src/features/newfeeds/data/data_sources/firebase_data_source.dart';
-import 'package:instagram_clone/src/features/newfeeds/domain/entities/user_entity.dart';
+import 'package:instagram_clone/src/core/common/entities/user_entity.dart';
 import 'package:instagram_clone/src/features/newfeeds/domain/repositories/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {

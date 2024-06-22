@@ -3,26 +3,29 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/src/core/theme/color_palette.dart';
+import 'package:instagram_clone/src/features/add_post/presentation/pages/add_post_page.dart';
 import 'package:instagram_clone/src/features/add_post/presentation/widgets/image_picker_bottom_sheet.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-class SelectImage extends StatefulWidget {
-  const SelectImage({super.key});
+class SelectImagePage extends StatefulWidget {
+  const SelectImagePage({super.key});
 
   @override
-  State<SelectImage> createState() => _SelectImageState();
+  State<SelectImagePage> createState() => _SelectImagePageState();
 }
 
-class _SelectImageState extends State<SelectImage> {
+class _SelectImagePageState extends State<SelectImagePage> {
   List<File?> imageFiles = [];
   int selectedImage = 0;
   void _getImage() async {
     var images = await getAllImagesFromGallery();
     for (int i = 0; i < images.length; i++) {
       var image = await images[i].file;
-      setState(() {
-        imageFiles.add(image);
-      });
+      if (mounted) {
+        setState(() {
+          imageFiles.add(image);
+        });
+      }
     }
   }
 
@@ -30,6 +33,24 @@ class _SelectImageState extends State<SelectImage> {
     setState(() {
       selectedImage = imageIndex;
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _onAddPageNavigate() {
+    if (imageFiles.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddPostPage(
+            imageFiles: [imageFiles[selectedImage]],
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -55,7 +76,7 @@ class _SelectImageState extends State<SelectImage> {
         centerTitle: false,
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: _onAddPageNavigate,
             child: const Text(
               'Next',
               style: TextStyle(
