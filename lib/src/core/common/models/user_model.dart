@@ -9,7 +9,7 @@ class UserModel extends UserEntity {
     required super.avatarUrl,
     required super.followers,
     required super.following,
-    required super.posts,
+    required super.posts, required super.bio,
   });
 
   Map<String, dynamic> toJson() {
@@ -31,7 +31,31 @@ class UserModel extends UserEntity {
       followers: map['followers'] as int,
       following: map['following'] as int,
       avatarUrl: map['avatarUrl'] as String?,
+      bio: map['bio'] as String?,
       posts: map['posts'] as int,
+    );
+  }
+
+  UserModel copyWith(
+    String? email,
+    String? username,
+    String? fullName,
+    String? avatarUrl,
+    String? bio,
+    int? followers,
+    int? following,
+    int? posts,
+  ) {
+    return UserModel(
+      id: id,
+      email: email ?? this.email,
+      userName: username ?? userName,
+      fullName: fullName ?? this.fullName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      bio: bio ?? this.bio,
+      followers: followers ?? this.followers,
+      following: following ?? this.following,
+      posts: posts ?? this.posts,
     );
   }
 }

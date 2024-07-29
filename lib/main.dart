@@ -1,17 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instagram_clone/src/core/theme/app_theme.dart';
+import 'package:instagram_clone/src/app.dart';
 import 'package:instagram_clone/src/features/add_post/presentation/blocs/post_bloc/post_bloc.dart';
-import 'package:instagram_clone/src/features/add_post/presentation/pages/select_image_page.dart';
 import 'package:instagram_clone/src/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:instagram_clone/src/features/newfeeds/presentation/blocs/posts_bloc/posts_bloc.dart';
 import 'package:instagram_clone/src/features/newfeeds/presentation/blocs/user_bloc/user_bloc.dart';
-import 'package:instagram_clone/src/features/newfeeds/presentation/pages/new_feeds_page.dart';
 import 'package:instagram_clone/src/features/search/presentation/blocs/search_user_bloc/search_user_bloc.dart';
-import 'package:instagram_clone/src/features/search/presentation/pages/explore_page.dart';
 import 'package:instagram_clone/src/features/user_profile/presentation/blocs/user_posts_bloc/user_posts_bloc.dart';
-import 'package:instagram_clone/src/features/user_profile/presentation/pages/personal_profile.dart';
+import 'package:instagram_clone/src/features/user_profile/presentation/blocs/user_profile_bloc/user_profile_bloc.dart';
 import 'package:instagram_clone/src/injection.dart';
 
 void main() async {
@@ -28,112 +24,9 @@ void main() async {
         BlocProvider(create: (_) => serviceLocator<PostBloc>()),
         BlocProvider(create: (_) => serviceLocator<UserPostsBloc>()),
         BlocProvider(create: (_) => serviceLocator<SearchUserBloc>()),
+        BlocProvider(create: (_) => serviceLocator<UserProfileBloc>()),
       ],
       child: const MyApp(),
-    ),
-  );
-}
-
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  int _currentPage = 0;
-
-  void _setPage(int index) {
-    setState(() {
-      _currentPage = index;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<PostsBloc>().add(LoadingPostsEvent());
-    context
-        .read<UserBloc>()
-        .add(LoadingUserEvent(userId: FirebaseAuth.instance.currentUser!.uid));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Instagram clone',
-      theme: AppTheme.appTheme,
-      home: Scaffold(
-        bottomNavigationBar: BottomNavigationBar(
-            onTap: _setPage,
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
-            currentIndex: _currentPage,
-            items: [
-              BottomNavigationBarItem(
-                icon: _bottomBarIcon('assets/icons/home_icon.png'),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: _bottomBarIcon('assets/icons/search_icon.png'),
-                label: 'Search',
-              ),
-              BottomNavigationBarItem(
-                icon: _bottomBarIcon('assets/icons/new_post_icon.png'),
-                label: 'New Post',
-              ),
-              BottomNavigationBarItem(
-                icon: _bottomBarIcon('assets/icons/like_icon.png'),
-                label: 'Liked',
-              ),
-              BottomNavigationBarItem(
-                icon:
-                    BlocBuilder<UserBloc, UserState>(builder: (context, state) {
-                  if (state is UserLoaded) {
-                    if (state.userEntity.avatarUrl != null) {
-                      return _bottomBarIcon(state.userEntity.avatarUrl!);
-                    }
-                  }
-                  return _bottomBarIcon('assets/images/default_avatar.png');
-                }),
-                label: 'User Profile',
-              ),
-            ]),
-        body: <Widget>[
-          const NewFeedsPage(),
-          const ExplorePage(),
-          const SelectImagePage(),
-          const SelectImagePage(),
-          const PersonalProfilePage()
-        ][_currentPage],
-      ),
-    );
-  }
-}
-
-Widget _bottomBarIcon(String path) {
-  if (path.substring(0, path.indexOf('/')) == 'assets') {
-    if (path == 'assets/images/default_avatar.png') {
-      return ClipOval(
-        child: Image.asset(
-          path,
-          width: 24,
-          height: 24,
-        ),
-      );
-    }
-    return Image.asset(
-      path,
-      width: 24,
-      height: 24,
-    );
-  }
-  return ClipOval(
-    child: Image.network(
-      path,
-      width: 24,
-      height: 24,
     ),
   );
 }

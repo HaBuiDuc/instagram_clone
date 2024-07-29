@@ -12,7 +12,11 @@ import 'package:instagram_clone/src/injection.dart';
 class Post extends StatefulWidget {
   final PostEntity postEntity;
   final void Function(UserEntity) onUserProfileNavigate;
-  const Post({super.key, required this.postEntity, required this.onUserProfileNavigate});
+  const Post({
+    super.key,
+    required this.postEntity,
+    required this.onUserProfileNavigate,
+  });
 
   @override
   State<Post> createState() => _PostState();
@@ -20,12 +24,13 @@ class Post extends StatefulWidget {
 
 class _PostState extends State<Post> {
   late final UserBloc _userBloc;
-  int _currentIndex = 0;
+
+  int _currentIndex = 0; // used to determine which image is being showed
   @override
   void initState() {
     super.initState();
     _userBloc = UserBloc(serviceLocator());
-    if (!_userBloc.isClosed) {
+    if (!_userBloc.isClosed && _userBloc.state is! UserLoaded) {
       _loadUserInfo();
     }
   }
@@ -62,9 +67,9 @@ class _PostState extends State<Post> {
                           height: 32,
                           child: ClipOval(
                             child: user.avatarUrl != null
-                                // ? Image.network(user.avatarUrl!)
                                 ? CachedNetworkImage(imageUrl: user.avatarUrl!)
-                                : Image.asset('assets/images/default_avatar.png'),
+                                : Image.asset(
+                                    'assets/images/default_avatar.png'),
                           ),
                         ),
                         const SizedBox(
@@ -180,3 +185,4 @@ class _PostState extends State<Post> {
     );
   }
 }
+

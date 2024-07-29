@@ -7,6 +7,7 @@ class UserEntity {
   final int following;
   final int posts;
   final String? avatarUrl;
+  final String? bio;
 
   UserEntity({
     required this.id,
@@ -14,6 +15,7 @@ class UserEntity {
     required this.userName,
     required this.fullName,
     required this.avatarUrl,
+    required this.bio,
     required this.followers,
     required this.following,
     required this.posts,

@@ -8,4 +8,5 @@ class ColorPalette {
   static const Color black = Color.fromRGBO(0, 0, 0, 1);
   static const Color shadeOfBlue = Color.fromRGBO(83, 149, 232, 1);
   static const Color blueSky = Color.fromRGBO(55, 151, 239, 1);
+  static const Color errorColor = Color.fromRGBO(255, 0, 0, 1);
 }

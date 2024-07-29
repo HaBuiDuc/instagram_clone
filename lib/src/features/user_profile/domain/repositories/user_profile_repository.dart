@@ -7,4 +7,14 @@ abstract interface class UserProfileRepository {
   Future<void> addFollowing(String followed);
   Future<void> unFollow(String followed);
   Future<bool> checkFollowing(String userId);
+    Future<Either<Failure, void>> updatingUserData({
+    String? email,
+    String? username,
+    String? fullName,
+    String? avatarUrl,
+    String? bio,
+    int? followers,
+    int? following,
+    int? posts,
+  });
 }

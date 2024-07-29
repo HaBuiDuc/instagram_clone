@@ -1,11 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_it/get_it.dart';
+import 'package:instagram_clone/src/core/common/data/firebase_data_source.dart';
+import 'package:instagram_clone/src/core/common/services/user_services.dart';
+import 'package:instagram_clone/src/core/common/use_case/get_current_user.dart';
 import 'package:instagram_clone/src/features/add_post/data/data_sources/add_post_data_source.dart';
 import 'package:instagram_clone/src/features/add_post/data/repositories/post_repository_impl.dart';
 import 'package:instagram_clone/src/features/add_post/domain/repositories/post_repository.dart';
 import 'package:instagram_clone/src/features/add_post/domain/use_cases/add_post.dart';
 import 'package:instagram_clone/src/features/add_post/presentation/blocs/post_bloc/post_bloc.dart';
-import 'package:instagram_clone/src/features/newfeeds/data/data_sources/firebase_data_source.dart';
+import 'package:instagram_clone/src/features/newfeeds/data/data_sources/newfeeds_data_source.dart';
 import 'package:instagram_clone/src/features/newfeeds/data/repositories/posts_repository_impl.dart';
 import 'package:instagram_clone/src/features/newfeeds/data/repositories/user_repository_impl.dart';
 import 'package:instagram_clone/src/features/newfeeds/domain/repositories/posts_repository.dart';
@@ -26,8 +29,10 @@ import 'package:instagram_clone/src/features/user_profile/domain/use_cases/add_f
 import 'package:instagram_clone/src/features/user_profile/domain/use_cases/check_following.dart';
 import 'package:instagram_clone/src/features/user_profile/domain/use_cases/get_user_posts.dart';
 import 'package:instagram_clone/src/features/user_profile/domain/use_cases/unfollow.dart';
+import 'package:instagram_clone/src/features/user_profile/domain/use_cases/updating_user_data.dart';
 import 'package:instagram_clone/src/features/user_profile/presentation/blocs/following_bloc/following_bloc.dart';
 import 'package:instagram_clone/src/features/user_profile/presentation/blocs/user_posts_bloc/user_posts_bloc.dart';
+import 'package:instagram_clone/src/features/user_profile/presentation/blocs/user_profile_bloc/user_profile_bloc.dart';
 import 'package:instagram_clone/src/firebase_options.dart';
 import 'package:instagram_clone/src/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:instagram_clone/src/features/auth/data/repositories/auth_repository_impl.dart';
@@ -39,6 +44,7 @@ import 'package:instagram_clone/src/features/auth/presentation/bloc/auth/auth_bl
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
+  _initUserServices();
   _initAuth();
   _initNewFeeds();
   _initAddingPost();
@@ -62,12 +68,12 @@ void _initAuth() {
 
 void _initNewFeeds() {
   serviceLocator
-    ..registerLazySingleton<FirebaseDataSource>(() => FirebaseDataSourceImpl())
+    ..registerLazySingleton<NewfeedsDataSource>(
+        () => NewfeedsDataSourceImpl(firebaseDataSource: serviceLocator()))
     ..registerFactory<UserRepository>(
         () => UserRepositoryImpl(firebaseDataSource: serviceLocator()))
     ..registerFactory<PostsRepository>(
         () => PostsRepositoryImpl(firebaseDataSource: serviceLocator()))
-    ..registerFactory(() => GetUser(userRepository: serviceLocator()))
     ..registerFactory(() => GetPosts(postRepository: serviceLocator()))
     ..registerLazySingleton(() => UserBloc(serviceLocator()))
     ..registerLazySingleton(() => PostsBloc(serviceLocator()));
@@ -95,9 +101,13 @@ void _initUserProfile() {
     ..registerFactory(() => Unfollow(userProfileRepository: serviceLocator()))
     ..registerFactory(
         () => CheckFollowing(userProfileDataSource: serviceLocator()))
+    ..registerFactory(
+        () => UpdatingUserData(userProfileRepository: serviceLocator()))
     ..registerLazySingleton(() => UserPostsBloc(serviceLocator()))
     ..registerLazySingleton(() =>
-        FollowingBloc(serviceLocator(), serviceLocator(), serviceLocator()));
+        FollowingBloc(serviceLocator(), serviceLocator(), serviceLocator()))
+    ..registerLazySingleton(() =>
+        UserProfileBloc(serviceLocator(), serviceLocator()));
 }
 
 void _initSearchUser() {
@@ -107,4 +117,13 @@ void _initSearchUser() {
         () => SearchRepositoryImpl(searchDataSource: serviceLocator()))
     ..registerFactory(() => SearchUser(searchRepository: serviceLocator()))
     ..registerLazySingleton(() => SearchUserBloc(serviceLocator()));
+}
+
+void _initUserServices() {
+  serviceLocator
+    ..registerLazySingleton<FirebaseDataSource>(() => FirebaseDataSourceImpl())
+    ..registerFactory<UserServices>(
+        () => UserServicesImpl(firebaseDataSource: serviceLocator()))
+    ..registerFactory(() => GetUser(userServices: serviceLocator()))
+    ..registerFactory(() => GetCurrentUser(userServices: serviceLocator()));
 }

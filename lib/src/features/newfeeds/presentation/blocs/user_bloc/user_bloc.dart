@@ -12,7 +12,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   UserBloc(GetUser getUser)
       : _getUser = getUser,
         super(UserInitial()) {
-    on<UserEvent>((event, emit) {});
     on<LoadingUserEvent>(_loadingUser);
   }
 

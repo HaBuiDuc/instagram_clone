@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instagram_clone/src/core/common/entities/user_entity.dart';
 import 'package:instagram_clone/src/core/common/widgets/loading_page.dart';
 import 'package:instagram_clone/src/core/theme/color_palette.dart';
-import 'package:instagram_clone/src/features/newfeeds/presentation/blocs/user_bloc/user_bloc.dart';
 import 'package:instagram_clone/src/features/user_profile/presentation/blocs/user_posts_bloc/user_posts_bloc.dart';
+import 'package:instagram_clone/src/features/user_profile/presentation/blocs/user_profile_bloc/user_profile_bloc.dart';
+import 'package:instagram_clone/src/features/user_profile/presentation/pages/edit_profile_pages/edit_profile_page.dart';
 import 'package:instagram_clone/src/features/user_profile/presentation/widgets/images_tab.dart';
 import 'package:instagram_clone/src/features/user_profile/presentation/widgets/profile_button.dart';
 import 'package:instagram_clone/src/features/user_profile/presentation/widgets/statistic_item.dart';
+import 'package:instagram_clone/src/features/user_profile/presentation/widgets/user_avatar.dart';
 
 class PersonalProfilePage extends StatefulWidget {
   const PersonalProfilePage({super.key});
@@ -30,9 +33,14 @@ class _PersonalProfilePageState extends State<PersonalProfilePage>
     });
   }
 
+  void _onEditProfNavigate(UserEntity user) {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (_) => EditProfilePage(user: user)));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, UserState>(
+    return BlocBuilder<UserProfileBloc, UserProfileState>(
       builder: (context, state) {
         if (state is UserLoaded) {
           var user = state.userEntity;
@@ -87,19 +95,7 @@ class _PersonalProfilePageState extends State<PersonalProfilePage>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                ClipOval(
-                                  child: (user.avatarUrl == null)
-                                      ? Image.asset(
-                                          'assets/images/default_avatar.png',
-                                          width: 96,
-                                          height: 96,
-                                        )
-                                      : Image.network(
-                                          user.avatarUrl!,
-                                          width: 96,
-                                          height: 96,
-                                        ),
-                                ),
+                                UserAvatar(avatarUrl: user.avatarUrl),
                                 StatisticItem(
                                   label: 'Posts',
                                   value: user.posts.toString(),
@@ -130,11 +126,13 @@ class _PersonalProfilePageState extends State<PersonalProfilePage>
                                 ),
                               ),
                             ),
+                            if (user.bio != null)
+                              Text(user.bio!),
                             Row(
                               children: [
                                 ProfileButton(
                                   label: 'Edit profile',
-                                  onPressed: () {},
+                                  onPressed: () => _onEditProfNavigate(user),
                                 ),
                                 const SizedBox(width: 8),
                                 ProfileButton(
@@ -197,6 +195,7 @@ class _PersonalProfilePageState extends State<PersonalProfilePage>
             ),
           );
         }
+        print(state);
         return const LoadingPage();
       },
     );

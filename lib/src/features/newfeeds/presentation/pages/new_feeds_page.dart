@@ -7,8 +7,8 @@ import 'package:instagram_clone/src/core/theme/color_palette.dart';
 import 'package:instagram_clone/src/features/newfeeds/presentation/blocs/posts_bloc/posts_bloc.dart';
 import 'package:instagram_clone/src/features/newfeeds/presentation/blocs/user_bloc/user_bloc.dart';
 import 'package:instagram_clone/src/features/newfeeds/presentation/widgets/post.dart';
-import 'package:instagram_clone/src/features/user_profile/presentation/pages/personal_profile.dart';
-import 'package:instagram_clone/src/features/user_profile/presentation/pages/user_profile.dart';
+import 'package:instagram_clone/src/features/user_profile/presentation/pages/profile_pages/personal_profile_page.dart';
+import 'package:instagram_clone/src/features/user_profile/presentation/pages/profile_pages/user_profile_page.dart';
 import 'package:instagram_clone/src/injection.dart';
 
 class NewFeedsPage extends StatefulWidget {
@@ -118,10 +118,10 @@ class _NewFeedsPageState extends State<NewFeedsPage> {
                       },
                     ),
                   )
-                  // const Center(child: Text('No posts available'))
                 ],
               );
             }
+            
             if (state is PostsLoadedFailure) {
               return const Center(child: Text('Something gone wrong!'));
             }

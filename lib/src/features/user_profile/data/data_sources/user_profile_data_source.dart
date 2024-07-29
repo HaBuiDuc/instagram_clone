@@ -8,19 +8,31 @@ abstract interface class UserProfileDataSource {
   Future<void> addFollowing(String followed);
   Future<void> unFollow(String followed);
   Future<bool> checkFollowing(String userId);
+  Future<void> updatingUserData(
+    String? email,
+    String? username,
+    String? fullName,
+    String? avatarUrl,
+    String? bio,
+    int? followers,
+    int? following,
+    int? posts,
+  );
 }
 
 class UserProfileDataSourceImpl implements UserProfileDataSource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String _currentUser = FirebaseAuth.instance.currentUser!.uid;
   @override
   Future<List<PostModel>> getUserPosts(String? userId) async {
+    final id =
+        (userId != null) // if no user id is given then use current user id
+            ? userId
+            : _currentUser;
     try {
       var collection = await _firestore
           .collection('posts')
-          .where('authorId',
-              isEqualTo: (userId != null)  // if no user id is given then use current user id
-                  ? userId
-                  : FirebaseAuth.instance.currentUser!.uid)
+          .where('authorId', isEqualTo: id)
           .get();
 
       List<PostModel> data = collection.docs
@@ -35,9 +47,9 @@ class UserProfileDataSourceImpl implements UserProfileDataSource {
   @override
   Future<void> addFollowing(String followed) async {
     try {
-      // delete follow data and then change the following data of follower and followed
+      // change the following data of follower and followed
       Map<String, dynamic> data = {
-        'follower': FirebaseAuth.instance.currentUser!.uid,
+        'follower': _currentUser,
         'followed': followed,
       };
       _firestore.collection('followings').add(data).then((value) {
@@ -56,7 +68,7 @@ class UserProfileDataSourceImpl implements UserProfileDataSource {
 
         _firestore
             .collection('users')
-            .where('id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .where('id', isEqualTo: _currentUser)
             .get()
             .then(
           (querySnapshot) {
@@ -74,14 +86,14 @@ class UserProfileDataSourceImpl implements UserProfileDataSource {
     }
   }
 
-// check if log in user is following a user with the given id
+  // check if log in user is following a user with the given id
   @override
   Future<bool> checkFollowing(String userId) async {
     try {
       final querySnapshot = await _firestore
           .collection('followings')
           .where('followed', isEqualTo: userId)
-          .where('follower', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .where('follower', isEqualTo: _currentUser)
           .get();
       if (querySnapshot.docs.isNotEmpty) {
         return true;
@@ -97,7 +109,7 @@ class UserProfileDataSourceImpl implements UserProfileDataSource {
     try {
       QuerySnapshot querySnapshot = await _firestore
           .collection('followings')
-          .where('follower', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .where('follower', isEqualTo: _currentUser)
           .where('followed', isEqualTo: followed)
           .get();
 
@@ -120,7 +132,7 @@ class UserProfileDataSourceImpl implements UserProfileDataSource {
 
             _firestore
                 .collection('users')
-                .where('id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                .where('id', isEqualTo: _currentUser)
                 .get()
                 .then(
               (querySnapshot) {
@@ -133,6 +145,44 @@ class UserProfileDataSourceImpl implements UserProfileDataSource {
           },
         );
       }
+    } on FirebaseException catch (e) {
+      throw ServerException(message: e.message ?? 'Something gone wrong!');
+    }
+  }
+
+  @override
+  Future<void> updatingUserData(
+    String? email,
+    String? username,
+    String? fullName,
+    String? avatarUrl,
+    String? bio,
+    int? followers,
+    int? following,
+    int? posts,
+  ) async {
+    Map<String, dynamic> updates = {};
+    if (email != null) updates['email'] = email;
+    if (username != null) updates['userName'] = username;
+    if (fullName != null) updates['fullName'] = fullName;
+    if (avatarUrl != null) updates['avatarUrl'] = avatarUrl;
+    if (bio != null) updates['bio'] = bio;
+    if (followers != null) updates['followers'] = followers;
+    if (following != null) updates['following'] = following;
+    if (posts != null) updates['posts'] = posts;
+    print(updates);
+    try {
+      await _firestore
+          .collection('users')
+          .where('id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get()
+          .then(
+        (querySnapshot) {
+          if (querySnapshot.size > 0) {
+            querySnapshot.docs.first.reference.update(updates);
+          }
+        },
+      );
     } on FirebaseException catch (e) {
       throw ServerException(message: e.message ?? 'Something gone wrong!');
     }

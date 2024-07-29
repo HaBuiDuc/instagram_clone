@@ -21,7 +21,9 @@ class UserProfilePage extends StatefulWidget {
 class _UserProfilePageState extends State<UserProfilePage>
     with TickerProviderStateMixin {
   int _selectedPage = 0;
+  int _followers = 0;
   late final TabController tabController;
+  // bloc for checking if current user is following viewed user
   final FollowingBloc _followingBloc =
       FollowingBloc(serviceLocator(), serviceLocator(), serviceLocator());
   final UserPostsBloc _userPostsBloc = UserPostsBloc(serviceLocator());
@@ -35,14 +37,24 @@ class _UserProfilePageState extends State<UserProfilePage>
       });
     });
     _followingBloc.add(CheckingFollowEvent(followed: widget.user.id));
+    setState(() {
+      _followers = widget.user.followers;
+    });
   }
+
 
   void _onFollow() {
     _followingBloc.add(AddingFollowEvent(followed: widget.user.id));
+    setState(() {
+      _followers++;
+    });
   }
 
   void _onUnfollow() {
     _followingBloc.add(UnfollowEvent(followed: widget.user.id));
+    setState(() {
+      _followers--;
+    });
   }
 
   @override
@@ -116,7 +128,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                           ),
                           StatisticItem(
                             label: 'Followers',
-                            value: user.followers.toString(),
+                            value: _followers.toString(),
                           ),
                           StatisticItem(
                             label: 'Following',

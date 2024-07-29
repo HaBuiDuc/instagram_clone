@@ -1,4 +1,4 @@
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:instagram_clone/src/core/common/entities/user_entity.dart';
 import 'package:instagram_clone/src/core/common/use_case/use_case.dart';
 import 'package:instagram_clone/src/core/errors/failure.dart';

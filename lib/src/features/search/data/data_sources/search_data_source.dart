@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:instagram_clone/src/core/errors/server_exception.dart';
-import 'package:instagram_clone/src/features/newfeeds/data/models/user_model.dart';
+import 'package:instagram_clone/src/core/common/models/user_model.dart';
 
 abstract interface class SearchDataSource {
   Future<List<UserModel>> searchUser(String query);
